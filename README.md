@@ -7,6 +7,9 @@
 
 # .env rule
 HOST: Host name (default: 127.0.0.1)
+
 USERDB: SQL Server username (default: sa)
+
 PASSWORD: SQL Server password
+
 DB: Name database you want to use
