@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>View Data - Tabel {{ table_name }}</h2>
+    <div class="form-inline">
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <span class="input-group-text">
+                    <i class="fas fa-search"></i>
+                </span>
+            </div>
+            <input type="text" class="form-control form-control-sm" id="searchInput" placeholder="Search...">
+        </div>
+    </div>
+</div>
+
+<form method="GET" action="/view_data">
+    <div class="form-group">
+        <label for="tableSelect">Choose Table</label>
+        <select class="form-control" id="tableSelect" name="table" onchange="this.form.submit()">
+            <option value="">-- Choose Table --</option>
+            {% for table in tables %}
+                <option value="{{ table }}" {% if table == table_name %} selected {% endif %}>{{ table }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</form>
+
+{% if rows %}
+    <table class="table table-striped table-bordered" id="dataTable">
+        <thead class="thead-dark">
+            <tr>
+                {% for column in columns %}
+                    <th>{{ column }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+                <tr>
+                    {% for value in row %}
+                        <td>{{ value }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>Data not found.</p>
+{% endif %}
+
+<script>
+    document.getElementById("searchInput").addEventListener("input", function() {
+        const searchValue = this.value.toLowerCase();
+        const rows = document.querySelectorAll("#dataTable tbody tr");
+        
+        rows.forEach(row => {
+            const cells = Array.from(row.getElementsByTagName("td"));
+            const rowText = cells.map(cell => cell.textContent.toLowerCase()).join(" ");
+            row.style.display = rowText.includes(searchValue) ? "" : "None";
+        });
+    });
+</script>
+{% endblock %}

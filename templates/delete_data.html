@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Delete Data</h1>
+
+    <form method="GET" action="/delete_data" class="form-inline mb-4">
+        <label for="table" class="mr-2">Choose Table:</label>
+        <select name="table" id="table" class="form-control mr-2" onchange="this.form.submit()">
+            <option value="" disabled selected>-- Choose Table --</option>
+            {% for table in tables %}
+                <option value="{{ table }}" {% if table == table_name %}selected{% endif %}>
+                    {{ table }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+
+    {% if table_name %}
+        <h2>Tabel: {{ table_name }}</h2>          
+            {% if action == "DELETE" %}
+                <table class="table table-striped table-bordered">
+                    <thead class="thead-dark">
+                        <tr>
+                            {% for column in columns %}
+                                <th>{{ column }}</th>
+                            {% endfor %}
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in rows %}
+                            <tr>
+                                {% for value in row %}
+                                    <td>{{ value }}</td>
+                                {% endfor %}
+                                <td>
+                                    <form method="POST" action="/delete_row" class="delete-form d-inline">
+                                        <input type="hidden" name="table" value="{{ table_name }}">
+                                        <input type="hidden" name="key_column" value="{{ primary_key }}">
+                                        <input type="hidden" name="key_value" value="{{ row[primary_key_index] }}">
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </form>
+    {% else %}
+        <div class="alert alert-warning">
+            <p>Please choose table for start DELETE operation.</p>
+        </div>
+    {% endif %}
+</div>
+
+<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="successModalLabel">Success!</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Data Deleted.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    document.querySelectorAll('.delete-form').forEach(function(form) {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form)
+            })
+            .then(response => {
+                $('#successModal').modal('show');
+                    
+                $('#successModal').on('hidden.bs.modal', function() {
+                    location.reload();
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

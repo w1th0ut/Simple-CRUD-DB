@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Insert Data</h1>
+
+    <form method="GET" action="/insert_data" class="form-inline mb-4">
+        <label for="table" class="mr-2">Choose Table:</label>
+        <select name="table" id="table" class="form-control mr-2" onchange="this.form.submit()">
+            <option value="" disabled selected>-- Choose Table --</option>
+            {% for table in tables %}
+                <option value="{{ table }}" {% if table == table_name %}selected{% endif %}>
+                    {{ table }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+
+    {% if table_name %}
+        <h2>Tabel: {{ table_name }}</h2>
+        <form method="POST" class="form-group">
+            <input type="hidden" id="action" name="action" value="INSERT">
+
+            {% for column in columns %}
+                <label for="{{ column }}">{{ column }}:</label>
+                <input type="text" name="{{ column }}" id="{{ column }}" class="form-control mb-3">
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    {% else %}
+        <div class="alert alert-warning">
+            <p>Please choose table for INSERT operation.</p>
+        </div>
+    {% endif %}
+
+    <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successModalLabel">Success!</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Data berhasil di INSERT.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% block scripts %}
+<script>
+    document.querySelectorAll('form').forEach(function(form) {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form)
+            })
+            .then(response => {
+                
+                $('#successModal').modal('show');
+                    
+                $('#successModal').on('hidden.bs.modal', function() {
+                    form.submit();
+                });
+                
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}
